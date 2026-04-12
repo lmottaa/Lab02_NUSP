@@ -1,0 +1,4 @@
+.venv/
+.env
+worker/__pycache__/*
+*.pyc

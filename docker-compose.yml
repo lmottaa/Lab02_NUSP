@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    container_name: worker
+    restart: on-failure:3
+    depends_on:
+      - db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      RAW_INPUT_PATH: /app/worker
+      RAW_OUTPUT_PATH: /app/worker
+      LOG_LEVEL: INFO
+      PYTHONUNBUFFERED: 1
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: worker_grafana
+    depends_on:
+      - db
+    ports:
+      - "3001:3000"
+    environment:
+      GRAFANA_USER: admin
+      GRAFANA_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      
+volumes:
+  postgres_data:
+  grafana_data:
