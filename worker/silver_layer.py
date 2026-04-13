@@ -1,6 +1,9 @@
 import os
 import pandas as pd
 from datetime import datetime
+import logging
+
+from sqlalchemy import create_engine
 
 from log_utils import calculate_latency
 
@@ -24,6 +27,17 @@ class SilverLayerProcessor:
         # Garantir existência dos diretórios de destino
         os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs(self.report_dir, exist_ok=True)
+
+        # Configurar engine do mesmo banco usado pela camada Gold
+        logging.getLogger('sqlalchemy').setLevel(logging.ERROR)
+        DB_NAME = os.getenv("POSTGRES_DB", "postgres")
+        DB_USER = os.getenv("POSTGRES_USER", "postgres")
+        DB_PASS = os.getenv("POSTGRES_PASSWORD", "postgres")
+        DB_HOST = os.getenv("DB_HOST", "localhost")
+        DB_PORT = os.getenv("DB_PORT", "5432")
+        DB_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+        self.engine = create_engine(DB_URL)
 
     def ingest_bronze(self) -> pd.DataFrame:
         """Lê os dados da camada Bronze (CSV)."""
@@ -146,11 +160,21 @@ Data de Processamento: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         return "\n".join([headers, separator] + rows)
     
     def persist_silver(self, df: pd.DataFrame):
-        """Salva os dados tratados em formato Parquet utilizando pyarrow."""
-        output_file = f"{self.output_dir}dataset_silver.parquet"
-        print(f"Persistindo dados na camada Silver: {output_file}")
-        # Pandas 3.0.1 utiliza pyarrow como engine padrão para Parquet
-        df.to_parquet(output_file, index=False, engine='pyarrow')
+        """Persiste o resultado da Silver como tabela de staging no banco.
+
+        A tabela de staging será sobrescrita (if_exists='replace').
+        """
+        table_name = os.getenv("SILVER_STAGING_TABLE", "staging_movies")
+        print(f"Persistindo staging table '{table_name}' no banco de dados...")
+
+        try:
+            if 'id' not in df.columns:
+                raise ValueError("Coluna 'id' ausente no DataFrame Silver.")
+
+            df.to_sql(table_name, self.engine, if_exists="replace", index=False, method="multi", chunksize=1000)
+            print(f"Persistido staging table: {table_name}")
+        except Exception as e:
+            print(f"Erro ao persistir staging table: {str(e)}")
 
     def run(self):
         """Orquestração principal do pipeline Silver."""
