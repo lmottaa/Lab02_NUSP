@@ -31,12 +31,11 @@ class GoldLayerProcessor:
         self.input_file = f"{self.silver_path}/data/silver/dataset_silver.parquet"
 
     def _load_parquet(self) -> pd.DataFrame:
-        """Lê os dados da camada Silver (Parquet)."""
-        print(f"Lendo dados Silver: {self.input_file}")
+        """Lê os dados da camada Silver a partir da tabela de staging no banco (staging_movies)."""
+        print("Lendo dados Silver da tabela 'staging_movies' no banco de dados")
 
-        # Garantir existência dos diretórios de destino
-        os.makedirs(os.path.dirname(self.input_file), exist_ok=True)
-        return pd.read_parquet(self.input_file)
+        # Lê diretamente a tabela de staging do banco em vez do arquivo Parquet
+        return pd.read_sql('SELECT * FROM staging_movies', self.engine)
 
     def _upsert_dimension(self, df: pd.DataFrame, table_name: str, db_name_col: str, input_column: str):
         """Insere valores únicos em tabelas de dimensão (Idempotente)."""
@@ -85,7 +84,7 @@ class GoldLayerProcessor:
         
         # 1. Carregar Dimensões Simples
         # dim_movies
-        available_cols = ['id', 'title', 'release_date', 'runtime', 'adult', 'original_language', 'status']
+        available_cols = ['id', 'title', 'release_date', 'runtime', 'adult', 'original_language', 'status', 'revenue', 'budget']
         # Só seleciona o que existe no DataFrame
         cols_to_select = [c for c in available_cols if c in df.columns]
         movies_df = df[cols_to_select].copy()

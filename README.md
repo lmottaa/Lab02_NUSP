@@ -221,3 +221,81 @@ A forma mais simples de rodar o projeto completo, incluindo o banco de dados Pos
 
 ---
 
+## 7. 🛠️ DBT — Ambiente, execução e resultados
+
+O projeto inclui um workspace DBT em `dbt_project/` com modelos e testes para as dimensões e bridges da Camada Gold.
+
+Passos rápidos para reproduzir o ambiente DBT localmente:
+
+1. Garanta que o PostgreSQL esteja em execução (por exemplo `docker-compose up --build`).
+2. Configure as variáveis de ambiente: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DB_HOST`, `DB_PORT`.
+3. Crie/ative um virtualenv Python (opcional):
+
+```bash
+python -m venv .venv
+# Linux/macOS
+source .venv/bin/activate
+# Windows (PowerShell)
+.\.venv\Scripts\Activate.ps1
+```
+
+4. Instale o DBT (adapter PostgreSQL):
+
+```bash
+pip install dbt-core dbt-postgres
+```
+
+5. Execute o DBT a partir de `dbt_project/`:
+
+```bash
+cd dbt_project
+dbt deps
+dbt run
+dbt test
+dbt docs generate
+# Opcional: visualizar docs localmente
+dbt docs serve
+```
+
+Exemplo de `~/.dbt/profiles.yml` recomendado (usa `env_var` para manter credenciais fora do arquivo):
+
+```yaml
+lab02_nusp:
+    target: dev
+    outputs:
+        dev:
+            type: postgres
+            host: "{{ env_var('DB_HOST', 'localhost') }}"
+            port: "{{ env_var('DB_PORT', '5432') }}"
+            user: "{{ env_var('POSTGRES_USER', 'postgres') }}"
+            password: "{{ env_var('POSTGRES_PASSWORD', 'postgres') }}"
+            dbname: "{{ env_var('POSTGRES_DB', 'postgres') }}"
+            schema: public
+            threads: 4
+
+```
+
+Resultados e artefatos DBT
+- Logs, `manifest.json` e artefatos ficam em `dbt_project/target/`.
+- Prints e imagens das execuções DBT estão em [docs/dbt-images](docs/dbt-images).
+
+## 8. 📊 BI com Grafana (Camada Gold)
+
+O projeto utiliza a Camada Gold como fonte analítica (DBT e Medallion) — recomendamos usar Grafana apontando para o PostgreSQL da Camada Gold para painéis e explorações.
+
+Passos rápidos (exemplo):
+
+1. Iniciar um container Grafana (exemplo):
+
+```bash
+docker run -d -p 3000:3000 --name grafana grafana/grafana
+```
+
+2. Adicionar uma datasource PostgreSQL em Grafana usando as mesmas credenciais/host do projeto.
+3. Importar ou criar dashboards consultando `fact_*` e `dim_*` da Camada Gold.
+
+Os prints e dashboards gerados estão armazenados em [docs/data_visualization](docs/data_visualization) - Camada Gold Medallion.
+
+Os prints e dashboards gerados estão armazenados em [docs/dbt-images](docs/dbt-images) - Camada Gold DBT.
+
+---

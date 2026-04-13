@@ -13,7 +13,9 @@ select
     m.title,
     m.release_date,
     fm.genre_id,
-    g.genre_name
+    g.genre_name,
+    -- Usando a Macro para duração planejada
+    {{ get_profit('m.revenue', 'm.budget') }} as profit
 from
     movies m
     left join movies_genre fm on m.movie_id = fm.movie_id

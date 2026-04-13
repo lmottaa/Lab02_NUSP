@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS dim_movies (
     title VARCHAR(500) NOT NULL,
     release_date DATE,
     release_year INT,
+    revenue NUMERIC(15, 2),
+    budget NUMERIC(15, 2),
     runtime INT,
     adult BOOLEAN,
     original_language VARCHAR(10),
