@@ -16,7 +16,7 @@ def main():
 
     raw_processor.run()
     silver_processor.run()
-    gold_processor.run()
+    #gold_processor.run()
 
     endDateTime = datetime.now()
     latency = calculate_latency(startDateTime, endDateTime)

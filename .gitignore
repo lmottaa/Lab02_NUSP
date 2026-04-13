@@ -6,3 +6,15 @@ coverage/
 *.log
 .env*
 !.env.example
+worker/__pycache__/gold_layer.cpython-312.pyc
+worker/__pycache__/gold_layer.cpython-313.pyc
+worker/__pycache__/log_utils.cpython-312.pyc
+worker/__pycache__/log_utils.cpython-313.pyc
+worker/__pycache__/log_utils.cpython-314.pyc
+worker/__pycache__/raw_layer.cpython-312.pyc
+worker/__pycache__/raw_layer.cpython-313.pyc
+worker/__pycache__/raw_layer.cpython-314.pyc
+worker/__pycache__/silver_layer.cpython-312.pyc
+worker/__pycache__/silver_layer.cpython-313.pyc
+worker/__pycache__/worker.cpython-313.pyc
+worker/__pycache__/worker.cpython-314.pyc
