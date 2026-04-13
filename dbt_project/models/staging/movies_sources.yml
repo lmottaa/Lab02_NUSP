@@ -35,9 +35,9 @@ sources:
             description: "Índice de popularidade do filme, calculado com base em diversos fatores como avaliações e receita."
           - name: updated_at
             description: "Data e hora da última atualização dos dados do filme."
-          - name: production_company_id
+          - name: company_id
             description: "Identificador da empresa de produção do filme, referenciando a dimensão de empresas de produção."
-          - name: production_country_id
+          - name: country_id
             description: "Identificador do país de produção do filme, referenciando a dimensão de países de produção."
           
       - name: dim_language
@@ -53,7 +53,7 @@ sources:
             tests:
               - not_null
 
-      - name: dim_genre
+      - name: dim_genres
         description: "Dimensão para armazenar informações sobre gêneros de filmes."
         columns:
           - name: id
@@ -63,10 +63,10 @@ sources:
           - name: genre_name
             description: "Nome do gênero."
 
-      - name: dim_production_company
+      - name: dim_companies
         description: "Dimensão para armazenar informações sobre empresas de produção de filmes."
         columns:
-          - name: id
+          - name: company_id
             description: "Identificador único da empresa de produção."
             tests:
               - unique
@@ -76,7 +76,7 @@ sources:
             tests:
               - not_null
 
-      - name: dim_production_country
+      - name: dim_country
         description: "Dimensão para armazenar informações sobre países de produção de filmes."
         columns:
           - name: id
@@ -88,7 +88,8 @@ sources:
             description: "Nome do país de produção."
             tests:
               - not_null
-      - name: bridge_movie_genre
+      
+      - name: bridge_movie_genres
         description: "Tabela de ponte para relacionar filmes e gêneros, permitindo um relacionamento muitos-para-muitos."
         columns:
           - name: movie_id
@@ -99,6 +100,7 @@ sources:
             description: "Identificador do gênero, referenciando a tabela dim_genre."
             tests:
               - not_null
+      
       - name: bridge_movie_language
         description: "Tabela de ponte para relacionar filmes e idiomas, permitindo um relacionamento muitos-para-muitos."
         columns:
@@ -110,25 +112,27 @@ sources:
             description: "Identificador do idioma, referenciando a tabela dim_language."
             tests:
               - not_null
-      - name: bridge_movie_production_company
+      
+      - name: bridge_movie_companies
         description: "Tabela de ponte para relacionar filmes e empresas de produção, permitindo um relacionamento muitos-para-muitos."
         columns:
           - name: movie_id
             description: "Identificador do filme, referenciando a tabela de staging_movies."
             tests:
               - not_null
-          - name: production_company_id
-            description: "Identificador da empresa de produção, referenciando a tabela dim_production_company."
+          - name: company_id
+            description: "Identificador da empresa de produção, referenciando a tabela dim_company."
             tests:
               - not_null
-      - name: bridge_movie_production_country
+      
+      - name: bridge_movie_country
         description: "Tabela de ponte para relacionar filmes e países de produção, permitindo um relacionamento muitos-para-muitos."
         columns:
           - name: movie_id
             description: "Identificador do filme, referenciando a tabela de staging_movies."
             tests:
               - not_null
-          - name: production_country_id
-            description: "Identificador do país de produção, referenciando a tabela dim_production_country."
+          - name: country_id
+            description: "Identificador do país de produção, referenciando a tabela dim_country."
             tests:
               - not_null

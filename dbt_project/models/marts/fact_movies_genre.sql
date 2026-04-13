@@ -1,25 +1,20 @@
-with fact_movies_genre as (
-    select * from {{ source('movies_sources', 'fact_movies_genre') }}
-),
-movies as (
+with movies as (
     select * from {{ source('movies_sources', 'dim_movies') }}
 ),
 genre as (
-    select * from {{ source('movies_sources', 'dim_genre') }}
+    select * from {{ source('movies_sources', 'dim_genres') }}
+),
+movies_genre as (
+    select * from {{ source('movies_sources', 'bridge_movie_genres') }}
 )
 
 select
-    fm.movie_id,
+    m.movie_id,
     m.title,
     m.release_date,
-    m.revenue,
-    m.budget,
-    m.profit,
-    m.vote_average,
-    m.vote_count,
-    m.popularity,
     fm.genre_id,
     g.genre_name
-from fact_movies_genre fm
-join movies m on fm.movie_id = m.movie_id
-join genre g on fm.genre_id = g.genre_id
+from
+    movies m
+    left join movies_genre fm on m.movie_id = fm.movie_id
+    left join genre g on fm.genre_id = g.genre_id
